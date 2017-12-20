@@ -16,6 +16,7 @@ public:
 		mReadIndex(0), mWriteIndex(0)
 	{
 		mNotMissedPackages.clear();
+		mNotMissedPackages.test_and_set();
 	}
 	
 
@@ -33,8 +34,8 @@ public:
 	{
 		if (!empty()) {
 			data = mData[mReadIndex];
-			missedPackages = mNotMissedPackages.test_and_set();
 			increment(mReadIndex);
+			missedPackages = !mNotMissedPackages.test_and_set();			
 			return true;
 		}
 		else

@@ -9,6 +9,8 @@
 #include "queue.h"
 #include "timestamp.h"
 #include "timestats.h"
+#include "extendedtimestamp.h"
+#include "extendedtimestats.h"
 
 class Measurement {
 
@@ -18,7 +20,7 @@ public:
 
 	void time_before(const char *id2iperf_contextName);
 
-	void time_after();
+	void time_after(int statementCount);
 
 	void report();
 
@@ -26,14 +28,16 @@ protected:
 	void consumerThread();
 
 private:
-
+	int mMeasurementsCount;
 	bool mConsumerRunning;
 	std::thread mConsumerThread;
 	Queue<Timestamp> mQueue;
 	TimestampFactory mFactory;
 
-	std::map<std::string, TimeStats> mStats;
+	std::map<std::string, ExtendedTimeStats> mStats;
 
-	std::stack<Timestamp> mStack;
+	std::stack<ExtendedTimestamp> mStack;
+
+	
 
 };
