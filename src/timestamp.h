@@ -21,6 +21,19 @@ struct PlatformTimestamp{
 };
 #endif
 
+#ifdef __linux__
+
+#include <pthread.h>
+
+typedef pthread_t NativeHandle;
+
+struct PlatformTimestamp {
+
+	TimeStats operator-(const PlatformTimestamp &start);
+};
+
+#endif
+
 struct Timestamp {
 	const char *mContext;
 	bool mBefore;

@@ -1,8 +1,7 @@
-#include "timestamp.h"
+#ifdef _WIN32
 
 #include <Windows.h>
-
-#ifdef _WIN32
+#include "timestamp.h"
 
 TimestampFactory::TimestampFactory() :
 	mHandle(GetCurrentThread()) {
