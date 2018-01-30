@@ -3,12 +3,11 @@
 #include <map>
 #include <stack>
 #include <thread>
-#include <iostream>
+
 #include <string>
 
 #include "queue.h"
 #include "timestamp.h"
-#include "timestats.h"
 #include "extendedtimestamp.h"
 #include "extendedtimestats.h"
 

@@ -16,6 +16,11 @@ void id2iperf_time_before(char * id2iperf_contextName)
 	sMeasurement->time_before(id2iperf_contextName);
 }
 
+void id2iperf_time_before_counter(char *id2iperf_contextName, int currentIdentifier)
+{
+	id2iperf_time_before(id2iperf_contextName); 
+}
+
 void id2iperf_time_start()
 {
 	sMeasurement = new Measurement;

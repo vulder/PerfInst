@@ -1,14 +1,48 @@
 #include "measurement.h"
 #include <set>
 #include "extendedtimestats.h"
+#include <iostream>
+#include <pthread.h>
 
 
 Measurement::Measurement() :
-	mConsumerRunning(true),
 	mMeasurementsCount(0),
+	mConsumerRunning(true),
 	mConsumerThread(&Measurement::consumerThread, this)
 {
 	mQueue.push(mFactory.getCurrentBefore("BASE"));
+
+	cpu_set_t cpuset;
+
+	CPU_ZERO(&cpuset);
+
+	for (int i = 0; i <= 4; ++i)
+	{
+		CPU_SET(i, &cpuset);
+		CPU_SET(i + 10, &cpuset);
+	}
+
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) != 0)
+	{
+		std::cout << "Could not set thread affinity. Wrong machine? Aborting!" << std::endl;
+		abort();
+	}
+
+	CPU_ZERO(&cpuset);
+
+	for (int i = 5; i <= 9; ++i)
+	{
+		CPU_SET(i, &cpuset);
+		CPU_SET(i + 10, &cpuset);
+	}
+
+	
+	if (pthread_setaffinity_np(mConsumerThread.native_handle(), sizeof(cpu_set_t), &cpuset) != 0)
+	{
+		std::cout << "Could not set thread affinity. Wrong machine? Aborting!" << std::endl;
+		abort();
+	}
+
 }
 
 Measurement::~Measurement() {
