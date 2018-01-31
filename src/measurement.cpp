@@ -3,6 +3,7 @@
 #include "extendedtimestats.h"
 #include <iostream>
 #include <pthread.h>
+#include <unordered_map>
 
 
 Measurement::Measurement() :
@@ -94,7 +95,7 @@ void Measurement::report() {
 
 		bool missedPackages;
 		Timestamp timestamp;
-		std::map<std::string, int> context;
+		std::unordered_map<std::string, int> context;
 		while (mConsumerRunning || !mQueue.empty()) {
 			if (mQueue.consume(timestamp, missedPackages)) {
 				if (missedPackages)
@@ -124,6 +125,6 @@ void Measurement::report() {
 					mStack.pop();
 				}
 			}
-			std::this_thread::yield();
+			//std::this_thread::yield();
 		}
 	}
