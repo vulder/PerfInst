@@ -97,7 +97,11 @@ void Measurement::report() {
 		std::map<std::string, int> context;
 		while (mConsumerRunning || !mQueue.empty()) {
 			if (mQueue.consume(timestamp, missedPackages)) {
-				std::cout << missedPackages << std::endl;
+				if (missedPackages)
+				{
+					std::cout << "Missed a package. Aborting!" << std::endl;
+					abort();
+				}
 				if (timestamp.mBefore) {
 					const auto &pib = context.insert({timestamp.mContext,0});
 					mStack.emplace(std::move(timestamp), pib.second);
