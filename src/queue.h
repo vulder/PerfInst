@@ -8,7 +8,7 @@
  * A single-producer, single-consumer queue.
  */
 
-template <class T, size_t bufferSize = 32>
+template <class T, size_t bufferSize = 128>
 class Queue {
 public:
 
