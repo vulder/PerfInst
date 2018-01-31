@@ -95,7 +95,7 @@ void Measurement::report() {
 
 		bool missedPackages;
 		Timestamp timestamp;
-		std::unordered_map<std::string, int> context;
+		std::unordered_map<const char *, int> context;
 		while (mConsumerRunning || !mQueue.empty()) {
 			if (mQueue.consume(timestamp, missedPackages)) {
 				if (missedPackages)
