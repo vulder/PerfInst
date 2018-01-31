@@ -72,7 +72,7 @@ void Measurement::report() {
 	std::cout << "Hashmap size: " << mStats.size() << std::endl;
 	std::cout << "Measurement counter: " << mMeasurementsCount << std::endl;
 
-	for (const std::pair<const std::string, ExtendedTimeStats> &featureStats : mStats) {
+	for (const std::pair<const char *, ExtendedTimeStats> &featureStats : mStats) {
 		std::cout << 
 			featureStats.first << 
 			" -> " << 
