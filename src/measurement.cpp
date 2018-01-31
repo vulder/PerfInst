@@ -72,12 +72,12 @@ void Measurement::report() {
 	std::cout << "Hashmap size: " << mStats.size() << std::endl;
 	std::cout << "Measurement counter: " << mMeasurementsCount << std::endl;
 
-	for (const std::pair<const char *, ExtendedTimeStats> &featureStats : mStats) {
+	for (const std::pair<const char * const, ExtendedTimeStats> &featureStats : mStats) {
 		std::cout << 
 			featureStats.first << 
 			" -> " << 
-			std::chrono::duration_cast<std::chrono::milliseconds>(featureStats.second.mStats.mDuration).count() << 
-			", 0 ms (measurements: " << 
+			featureStats.second.mStats.mDuration.count() << 
+			", 0 ns (measurements: " << 
 			featureStats.second.mMeasurements << 
 			"; statements: " << 
 			featureStats.second.mStats.mStatementCount << 
