@@ -3,8 +3,11 @@
 Project(PerfInst)
 
 set (CMAKE_CXX_STANDARD 14)
+
 SET(CMAKE_BUILD_TYPE Release)
-SET(CMAKE_CXX_FLAGS_RELEASE "-O2")
+if(UNIX)
+	SET(CMAKE_CXX_FLAGS_RELEASE "-O2")
+endif()
 
 find_package (Threads)
 

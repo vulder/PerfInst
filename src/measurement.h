@@ -28,6 +28,7 @@ protected:
 
 private:
 	int mMeasurementsCount;
+	perf_clock::duration mMeasurementsOverhead;
 	bool mConsumerRunning;
 	std::thread mConsumerThread;
 	Queue<Timestamp> mQueue;

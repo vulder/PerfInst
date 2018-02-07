@@ -2,8 +2,11 @@
 #include <set>
 #include "extendedtimestats.h"
 #include <iostream>
+#ifdef __linux__
 #include <pthread.h>
+#endif
 #include <unordered_map>
+#include <thread>
 
 
 Measurement::Measurement() :
@@ -11,8 +14,10 @@ Measurement::Measurement() :
 	mConsumerRunning(true),
 	mConsumerThread(&Measurement::consumerThread, this)
 {
-	mQueue.push(mFactory.getCurrentBefore("BASE"));
+	Timestamp ts = mFactory.getCurrentBefore("BASE");
+	mQueue.push(ts, ts);
 
+#ifdef __linux__
 	cpu_set_t cpuset;
 
 	CPU_ZERO(&cpuset);
@@ -43,6 +48,7 @@ Measurement::Measurement() :
 		std::cout << "Could not set thread affinity. Wrong machine? Aborting!" << std::endl;
 		abort();
 	}
+#endif
 
 }
 
@@ -54,15 +60,29 @@ Measurement::~Measurement() {
 }
 
 void Measurement::time_before(const char *id2iperf_contextName) {
-	mQueue.push(mFactory.getCurrentBefore(id2iperf_contextName));
+
+	Timestamp ts = mFactory.getCurrentBefore(id2iperf_contextName);
+	if (!mQueue.try_push(ts, ts))
+	{
+		mQueue.wait();
+		Timestamp ts2 = mFactory.getCurrentBefore(id2iperf_contextName);
+		mQueue.push(ts2, ts);
+	}
 }
 
 void Measurement::time_after(int statementCount) {
-	mQueue.push(mFactory.getCurrentAfter(statementCount));
+	Timestamp ts = mFactory.getCurrentAfter(statementCount);
+	if (!mQueue.try_push(ts, ts))
+	{
+		mQueue.wait();
+		Timestamp ts2 = mFactory.getCurrentAfter(statementCount);
+		mQueue.push(ts2, ts);
+	}
 }
 
 void Measurement::report() {
-	mQueue.push(mFactory.getCurrentAfter(0));
+	Timestamp ts = mFactory.getCurrentAfter(0);
+	mQueue.push(ts, ts);
 	mConsumerRunning = false;
 	mConsumerThread.join();
 
@@ -77,7 +97,9 @@ void Measurement::report() {
 			featureStats.first << 
 			" -> " << 
 			featureStats.second.mStats.mDuration.count() << 
-			", 0 ns (measurements: " << 
+			", " <<
+			featureStats.second.mOverhead.mDuration.count() <<
+			" ns (measurements: " << 
 			featureStats.second.mMeasurements << 
 			"; statements: " << 
 			featureStats.second.mStats.mStatementCount << 
@@ -85,7 +107,13 @@ void Measurement::report() {
 			std::endl;
 	}
 
-	std::cout << "Total time: " << std::chrono::duration_cast<std::chrono::milliseconds>(mStats["BASE"].mStats.mDuration).count() << " ms (overhead: 0)" << std::endl;
+	std::cout << 
+		"Total time: " << 
+		std::chrono::duration_cast<std::chrono::milliseconds>(mStats["BASE"].mStats.mDuration).count() << 
+		" ms (overhead: " <<
+		std::chrono::duration_cast<std::chrono::milliseconds>(mMeasurementsOverhead).count() <<
+		")"
+	<< std::endl;
 	std::cout << "-- Hercules Performance End --" << std::endl;
 }
 
@@ -93,34 +121,31 @@ void Measurement::report() {
 	void Measurement::consumerThread() {
 	using namespace std::chrono_literals;
 
-		bool missedPackages;
-		Timestamp timestamp;
+		std::pair<Timestamp, Timestamp> timestamps;
 		std::unordered_map<const char *, int> context;
 		while (mConsumerRunning || !mQueue.empty()) {
-			if (mQueue.consume(timestamp, missedPackages)) {
-				if (missedPackages)
-				{
-					std::cout << "Missed a package. Aborting!" << std::endl;
-					abort();
-				}
-				if (timestamp.mBefore) {
-					const auto &pib = context.insert({timestamp.mContext,0});
-					mStack.emplace(std::move(timestamp), pib.second);
+			if (mQueue.consume(timestamps)) {
+				if (timestamps.first.mBefore) {
+					const auto &pib = context.insert({timestamps.first.mContext,0});
+					mStack.emplace(std::move(timestamps.first), timestamps.second, pib.second);
 					++(pib.first->second);
 				}
 				else {
 					ExtendedTimestamp &start = mStack.top();
 					ExtendedTimeStats &stats = mStats[start.mTimestamp.mContext];
+					stats.mOverhead += start.mOverhead;
+					stats.mOverhead += (timestamps.first - timestamps.second);
 					if (!start.mOutermost)
 					{
-						stats.mStats.mStatementCount += timestamp.mStatementCount;
+						stats.mStats.mStatementCount += timestamps.first.mStatementCount;
 					}else
 					{
-						stats.mStats += timestamp - start.mTimestamp;
+						stats.mStats += timestamps.first - start.mTimestamp;
 						auto it = context.find(start.mTimestamp.mContext);
 						stats.mMeasurements += it->second;
 						context.erase(it);
 						++mMeasurementsCount;
+						mMeasurementsOverhead += stats.mOverhead.mDuration;
 					}
 					mStack.pop();
 				}

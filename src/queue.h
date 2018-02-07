@@ -15,35 +15,66 @@ public:
 	Queue() :
 		mReadIndex(0), mWriteIndex(0)
 	{
-		mNotMissedPackages.clear();
-		mNotMissedPackages.test_and_set();
 	}
 	
-
-	void push(const T &data) {
-		if (next(mWriteIndex) == mReadIndex) {
-			mNotMissedPackages.clear();
-		}
-		else {
-			mData[mWriteIndex] = data;
+	bool try_push(const T &data1, const T &data2)
+	{
+		if (full())
+		{
+			return false;
+		}else
+		{
+			mData[mWriteIndex] = { data1, data2 };
 			increment(mWriteIndex);
 		}
 	}
 
-	bool consume(T &data, bool &missedPackages)
+	void push(const T &data1, const T &data2) {
+		if (full()) {
+			throw 0;
+		}
+		else {
+			mData[mWriteIndex] = { data1, data2 };
+			increment(mWriteIndex);
+		}
+	}
+
+	bool consume(std::pair<T, T> &data)
 	{
 		if (!empty()) {
 			data = mData[mReadIndex];
-			increment(mReadIndex);
-			missedPackages = !mNotMissedPackages.test_and_set();			
+			increment(mReadIndex);			
 			return true;
 		}
 		else
 			return false;
 	}
 
+	void wait(bool waitForEmpty = false, bool yield = false)
+	{
+		if (waitForEmpty) {
+			while (!empty())
+			{
+				if (yield)
+					std::this_thread::yield();
+			}
+		}else
+		{
+			while (full())
+			{
+				if (yield)
+					std::this_thread::yield();
+			}
+		}
+	}
+
 	bool empty() const {
 		return mWriteIndex == mReadIndex;
+	}
+
+	bool full() const
+	{
+		return next(mWriteIndex) == mReadIndex;
 	}
 
 protected:
@@ -51,7 +82,7 @@ protected:
 		index = next(index);
 	}
 
-	int next(int index) {
+	static int next(int index){
 		return (index + 1) % bufferSize;
 	}
 
@@ -59,8 +90,6 @@ private:
 	
 	std::atomic<int> mReadIndex, mWriteIndex;
 
-	std::atomic_flag mNotMissedPackages;
-
-	std::array<T, bufferSize> mData;
+	std::array<std::pair<T, T>, bufferSize> mData;
 
 };
