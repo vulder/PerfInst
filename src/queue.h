@@ -26,6 +26,7 @@ public:
 		{
 			mData[mWriteIndex] = { data1, data2 };
 			increment(mWriteIndex);
+			return true;
 		}
 	}
 
