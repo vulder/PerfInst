@@ -81,6 +81,8 @@ void Measurement::time_after(int statementCount) {
 }
 
 void Measurement::report() {
+	perf_clock::duration fullOverhead;
+
 	Timestamp ts = mFactory.getCurrentAfter(0);
 	mQueue.push(ts, ts);
 	mConsumerRunning = false;
@@ -105,13 +107,14 @@ void Measurement::report() {
 			featureStats.second.mStats.mStatementCount << 
 			")" << 
 			std::endl;
+		fullOverhead += featureStats.second.mOverhead.mDuration;
 	}
 
 	std::cout << 
 		"Total time: " << 
 		std::chrono::duration_cast<std::chrono::milliseconds>(mStats["BASE"].mStats.mDuration).count() << 
 		" ms (overhead: " <<
-		std::chrono::duration_cast<std::chrono::milliseconds>(mMeasurementsOverhead).count() <<
+		std::chrono::duration_cast<std::chrono::milliseconds>(fullOverhead).count() <<
 		")"
 	<< std::endl;
 	std::cout << "-- Hercules Performance End --" << std::endl;
@@ -119,7 +122,6 @@ void Measurement::report() {
 
 
 	void Measurement::consumerThread() {
-	using namespace std::chrono_literals;
 
 		std::pair<Timestamp, Timestamp> timestamps;
 		std::unordered_map<const char *, int> context;
@@ -135,6 +137,7 @@ void Measurement::report() {
 					ExtendedTimeStats &stats = mStats[start.mTimestamp.mContext];
 					stats.mOverhead += start.mOverhead;
 					stats.mOverhead += (timestamps.first - timestamps.second);
+
 					if (!start.mOutermost)
 					{
 						stats.mStats.mStatementCount += timestamps.first.mStatementCount;
@@ -145,7 +148,7 @@ void Measurement::report() {
 						stats.mMeasurements += it->second;
 						context.erase(it);
 						++mMeasurementsCount;
-						mMeasurementsOverhead += stats.mOverhead.mDuration;
+					
 					}
 					mStack.pop();
 				}
