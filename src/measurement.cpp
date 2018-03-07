@@ -98,10 +98,10 @@ void Measurement::report() {
 		std::cout << 
 			featureStats.first << 
 			" -> " << 
-			featureStats.second.mStats.mDuration.count() << 
-			", " <<
-			featureStats.second.mOverhead.mDuration.count() <<
-			" ns (measurements: " << 
+			(featureStats.second.mStats.mDuration.count() / 1000000.0f) << 
+			" ms, " <<
+			(featureStats.second.mOverhead.mDuration.count() / 1000000.0f) <<
+			" ms (measurements: " << 
 			featureStats.second.mMeasurements << 
 			"; statements: " << 
 			featureStats.second.mStats.mStatementCount << 
