@@ -135,9 +135,9 @@ void Measurement::report() {
 				else {
 					ExtendedTimestamp &start = mStack.top();
 					ExtendedTimeStats &stats = mStats[start.mTimestamp.mContext];
-					stats.mOverhead += start.mOverhead;
-					stats.mOverhead += (timestamps.first - timestamps.second);
-
+					TimeStats overhead = start.mOverhead;
+					overhead += (timestamps.first - timestamps.second);
+					stats.mOverhead += overhead;
 					if (!start.mOutermost)
 					{
 						stats.mStats.mStatementCount += timestamps.first.mStatementCount;
@@ -148,9 +148,11 @@ void Measurement::report() {
 						stats.mMeasurements += it->second;
 						context.erase(it);
 						++mMeasurementsCount;
-					
 					}
 					mStack.pop();
+					if (!mStack.empty()){
+						mStack.top().mOverhead += overhead;
+					}
 				}
 			}
 			//std::this_thread::yield();
