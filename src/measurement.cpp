@@ -145,8 +145,8 @@ void Measurement::report() {
 						auto it = context.find(start.mTimestamp.mContext);
 						stats.mMeasurements += it->second;
 						context.erase(it);
-						++mMeasurementsCount;
 					}
+					++mMeasurementsCount;
 					mStack.pop();
 					if (!mStack.empty()){
 						mStack.top().mOverhead += overhead;
