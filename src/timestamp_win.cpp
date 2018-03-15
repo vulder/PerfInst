@@ -16,7 +16,7 @@ void TimestampFactory::getPlatformCurrent(PlatformTimestamp &ts) {
 
 }
 
-TimeStats PlatformTimestamp::operator-(const PlatformTimestamp &start) {
+TimeStats PlatformTimestamp::operator-(const PlatformTimestamp &start) const {
 	ULARGE_INTEGER startUser;
 	startUser.LowPart = start.mUserTime.dwLowDateTime;
 	startUser.HighPart = start.mUserTime.dwHighDateTime;

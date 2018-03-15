@@ -17,6 +17,6 @@ add_library(PerfInst SHARED include/perfinst.h src/measurement.cpp src/measureme
 
 target_link_libraries (PerfInst ${CMAKE_THREAD_LIBS_INIT})
 
-#add_executable(test test/main.c)
+add_executable(test test/main.c)
 
-#target_link_libraries(test PerfInst)
+target_link_libraries(test PerfInst)

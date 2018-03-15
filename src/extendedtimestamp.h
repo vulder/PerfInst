@@ -2,9 +2,9 @@
 
 struct ExtendedTimestamp
 {
-	ExtendedTimestamp(Timestamp &&t, const Timestamp &begin_t, bool outermost) : 
-		mTimestamp(std::forward<Timestamp>(t)), 
-		mOverhead(mTimestamp - begin_t),
+	ExtendedTimestamp(Timestamp &&begin_t, const Timestamp &end_t, bool outermost) :
+		mTimestamp(std::forward<Timestamp>(begin_t)), 
+		mOverhead(end_t - mTimestamp),
 		mOutermost(outermost) {}
 
 	Timestamp mTimestamp;

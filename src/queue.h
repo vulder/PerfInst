@@ -17,25 +17,25 @@ public:
 	{
 	}
 	
-	bool try_push(const T &data1, const T &data2)
+	bool try_push(const T &begin, const T &end)
 	{
 		if (full())
 		{
 			return false;
 		}else
 		{
-			mData[mWriteIndex] = { data1, data2 };
+			mData[mWriteIndex] = { begin, end };
 			increment(mWriteIndex);
 			return true;
 		}
 	}
 
-	void push(const T &data1, const T &data2) {
+	void push(const T &begin, const T &end) {
 		if (full()) {
 			throw 0;
 		}
 		else {
-			mData[mWriteIndex] = { data1, data2 };
+			mData[mWriteIndex] = { begin, end };
 			increment(mWriteIndex);
 		}
 	}

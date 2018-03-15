@@ -37,6 +37,7 @@ private:
 
 	std::stack<ExtendedTimestamp> mStack;
 
+	Timestamp mTimestampAfter;
 	Timestamp mBuffer1, mBuffer2;
 	Timestamp *mTimestampBuffer, *mTimestampSwap;
 

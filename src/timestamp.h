@@ -17,7 +17,7 @@ struct PlatformTimestamp{
 	FILETIME mKernelTime;
 	FILETIME mUserTime;
 
-	TimeStats operator-(const PlatformTimestamp &start);
+	TimeStats operator-(const PlatformTimestamp &start) const;
 };
 #endif
 
@@ -29,7 +29,7 @@ typedef pthread_t NativeHandle;
 
 struct PlatformTimestamp {
 
-	TimeStats operator-(const PlatformTimestamp &start);
+	TimeStats operator-(const PlatformTimestamp &start) const;
 };
 
 #endif
@@ -41,7 +41,7 @@ struct Timestamp {
 	perf_clock::time_point mTimepoint;
 	PlatformTimestamp mPlatformTimestamp;
 
-	TimeStats operator-(const Timestamp &start) {
+	TimeStats operator-(const Timestamp &start) const {
 		TimeStats diff = mPlatformTimestamp - start.mPlatformTimestamp;
 		diff.mDuration = mTimepoint - start.mTimepoint;
 		diff.mStatementCount = mStatementCount;

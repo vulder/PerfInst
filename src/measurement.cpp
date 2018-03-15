@@ -7,15 +7,16 @@
 #endif
 #include <unordered_map>
 #include <thread>
+#include <queue>
 
 
 Measurement::Measurement() :
 	mMeasurementsCount(0),
 	mConsumerRunning(true),
-	mConsumerThread(&Measurement::consumerThread, this)
+	mConsumerThread(&Measurement::consumerThread, this),
+	mTimestampBuffer(&mBuffer1),
+	mTimestampSwap(&mBuffer2)
 {
-	Timestamp ts = mFactory.getCurrentBefore("BASE");
-	mQueue.push(ts, ts);
 
 #ifdef __linux__
 	cpu_set_t cpuset;
@@ -50,6 +51,8 @@ Measurement::Measurement() :
 	}
 #endif
 
+	*mTimestampSwap = mFactory.getCurrentBefore("BASE");
+	mTimestampAfter = *mTimestampSwap;
 }
 
 Measurement::~Measurement() {
@@ -61,29 +64,30 @@ Measurement::~Measurement() {
 
 void Measurement::time_before(const char *id2iperf_contextName) {
 
-	Timestamp ts = mFactory.getCurrentBefore(id2iperf_contextName);
-	if (!mQueue.try_push(ts, ts))
-	{
-		mQueue.wait();
-		Timestamp ts2 = mFactory.getCurrentBefore(id2iperf_contextName);
-		mQueue.push(ts2, ts);
-	}
+	*mTimestampBuffer = mFactory.getCurrentBefore(id2iperf_contextName);
+	std::swap(mTimestampBuffer, mTimestampSwap);
+	mQueue.wait();
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	mQueue.push(*mTimestampBuffer, mTimestampAfter);
+	mTimestampAfter = mFactory.getCurrentBefore(id2iperf_contextName);
 }
 
 void Measurement::time_after(int statementCount) {
-	Timestamp ts = mFactory.getCurrentAfter(statementCount);
-	if (!mQueue.try_push(ts, ts))
-	{
-		mQueue.wait();
-		Timestamp ts2 = mFactory.getCurrentAfter(statementCount);
-		mQueue.push(ts2, ts);
-	}
+	*mTimestampBuffer = mFactory.getCurrentAfter(statementCount);
+	std::swap(mTimestampBuffer, mTimestampSwap);
+	mQueue.wait();
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	mQueue.push(*mTimestampBuffer, mTimestampAfter);
+	mTimestampAfter = mFactory.getCurrentAfter(statementCount);
 }
 
 void Measurement::report() {
+	*mTimestampBuffer = mFactory.getCurrentAfter(0);
+	mQueue.wait();
+	mQueue.push(*mTimestampSwap, mTimestampAfter);
+	mQueue.wait();
+	mQueue.push(*mTimestampBuffer, *mTimestampBuffer);
 
-	Timestamp ts = mFactory.getCurrentAfter(0);
-	mQueue.push(ts, ts);
 	mConsumerRunning = false;
 	mConsumerThread.join();
 
@@ -134,14 +138,14 @@ void Measurement::report() {
 					ExtendedTimestamp &start = mStack.top();
 					ExtendedTimeStats &stats = mStats[start.mTimestamp.mContext];
 					TimeStats overhead = start.mOverhead;
-					overhead += (timestamps.first - timestamps.second);
+					overhead += (timestamps.second - timestamps.first);
 					stats.mOverhead += overhead;
 					if (!start.mOutermost)
 					{
 						stats.mStats.mStatementCount += timestamps.first.mStatementCount;
 					}else
 					{
-						stats.mStats += timestamps.first - start.mTimestamp;
+						stats.mStats += timestamps.second - start.mTimestamp;
 						auto it = context.find(start.mTimestamp.mContext);
 						stats.mMeasurements += it->second;
 						context.erase(it);
