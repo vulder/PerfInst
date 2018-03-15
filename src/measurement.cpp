@@ -99,7 +99,7 @@ void Measurement::report() {
 		std::cout <<
 			featureStats.first <<
 			" -> " <<
-			((featureStats.second.mStats.mDuration - featureStats.second.mOverhead.mDuration).count() / 1000000.0f) <<
+			(featureStats.second.mStats.mDuration.count() / 1000000.0f) <<
 			" ms, " <<
 			(featureStats.second.mOverhead.mDuration.count() / 1000000.0f) <<
 			" ms (measurements: " <<
@@ -112,7 +112,7 @@ void Measurement::report() {
 
 	std::cout <<
 		"Total time: " <<
-		std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mStats.mDuration - mStats["BASE"].mOverhead.mDuration).count() / 1000000.0f <<
+		std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mStats.mDuration).count() / 1000000.0f <<
 		" ms (overhead: " <<
 		std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mOverhead.mDuration).count() / 1000000.0f <<
 		")"
@@ -125,34 +125,40 @@ void Measurement::report() {
 
 		std::pair<Timestamp, Timestamp> timestamps;
 		std::unordered_map<const char *, int> context;
+		
+		TimeStats overheadAccumulator;
+
 		while (mConsumerRunning || !mQueue.empty()) {
 			if (mQueue.consume(timestamps)) {
 				if (timestamps.first.mBefore) {
 					const auto &pib = context.insert({timestamps.first.mContext,0});
-					mStack.emplace(std::move(timestamps.first), timestamps.second, pib.second);
+
+					mStack.emplace(std::move(timestamps.first), overheadAccumulator, pib.second);
+					overheadAccumulator += timestamps.second - timestamps.first;
+					
 					++(pib.first->second);
 				}
 				else {
 					ExtendedTimestamp &start = mStack.top();
 					ExtendedTimeStats &stats = mStats[start.mTimestamp.mContext];
-					TimeStats overhead = start.mOverhead;
-					overhead += (timestamps.second - timestamps.first);
-					stats.mOverhead += overhead;
+
+					overheadAccumulator += timestamps.second - timestamps.first;
+
 					if (!start.mOutermost)
 					{
 						stats.mStats.mStatementCount += timestamps.first.mStatementCount;
 					}else
-					{
-						stats.mStats += timestamps.second - start.mTimestamp;
+					{						
+						TimeStats overhead = overheadAccumulator - start.mOverhead;
+						stats.mOverhead += overhead;
+						stats.mStats += timestamps.second - start.mTimestamp - overhead;
 						auto it = context.find(start.mTimestamp.mContext);
 						stats.mMeasurements += it->second;
 						context.erase(it);
 					}
+					
 					++mMeasurementsCount;
 					mStack.pop();
-					if (!mStack.empty()){
-						mStack.top().mOverhead += overhead;
-					}
 				}
 			}
 			//std::this_thread::yield();

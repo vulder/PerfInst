@@ -18,4 +18,14 @@ struct TimeStats {
 		mKernelTime += other.mKernelTime;
 		mStatementCount += other.mStatementCount;
 	}
+
+	TimeStats operator - (const TimeStats &other) const
+	{
+		TimeStats result;
+		result.mDuration = mDuration - other.mDuration;
+		result.mUserTime = mUserTime - other.mUserTime;
+		result.mKernelTime = mKernelTime - other.mKernelTime;
+		result.mStatementCount = mStatementCount - other.mStatementCount;
+		return result;
+	}
 };
