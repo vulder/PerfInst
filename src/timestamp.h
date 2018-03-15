@@ -44,7 +44,7 @@ struct Timestamp {
 	TimeStats operator-(const Timestamp &start) const {
 		TimeStats diff = mPlatformTimestamp - start.mPlatformTimestamp;
 		diff.mDuration = mTimepoint - start.mTimepoint;
-		diff.mStatementCount = mStatementCount;
+		diff.mStatementCount = mStatementCount - start.mStatementCount;
 		return diff;
 	}
 };
