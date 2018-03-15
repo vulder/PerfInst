@@ -67,7 +67,6 @@ void Measurement::time_before(const char *id2iperf_contextName) {
 	*mTimestampBuffer = mFactory.getCurrentBefore(id2iperf_contextName);
 	std::swap(mTimestampBuffer, mTimestampSwap);
 	mQueue.wait();
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	mQueue.push(*mTimestampBuffer, mTimestampAfter);
 	mTimestampAfter = mFactory.getCurrentBefore(id2iperf_contextName);
 }
@@ -76,7 +75,6 @@ void Measurement::time_after(int statementCount) {
 	*mTimestampBuffer = mFactory.getCurrentAfter(statementCount);
 	std::swap(mTimestampBuffer, mTimestampSwap);
 	mQueue.wait();
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	mQueue.push(*mTimestampBuffer, mTimestampAfter);
 	mTimestampAfter = mFactory.getCurrentAfter(statementCount);
 }
