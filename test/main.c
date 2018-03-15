@@ -8,7 +8,7 @@ int main() {
 
 	id2iperf_time_start();
 
-	id2iperf_time_before("test");
+	/*id2iperf_time_before("test");
 
 	id2iperf_time_before("test");
 	Sleep(300);
@@ -24,7 +24,7 @@ int main() {
 
 	Sleep(200);
 
-	id2iperf_time_after(2);
+	id2iperf_time_after(2);*/
 
 	id2iperf_time_end();
 
