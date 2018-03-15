@@ -14,7 +14,7 @@ void TimestampFactory::getPlatformCurrent(PlatformTimestamp &ts) {
 
 }
 
-TimeStats PlatformTimestamp::operator-(const PlatformTimestamp &start) {
+TimeStats PlatformTimestamp::operator-(const PlatformTimestamp &start) const {
 	
 	TimeStats diff;
 
