@@ -2,8 +2,8 @@
 
 #include "stdio.h"
 
-#include <chrono>
-#include <thread>
+#include <unistd.h>
+
 
 int main() {
 
@@ -12,18 +12,18 @@ int main() {
 	id2iperf_time_before("test");
 
 	id2iperf_time_before("test");
-	std::this_thread::sleep_for(std::chrono::milliseconds(300));
+	usleep(300);
 	id2iperf_time_after(1);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(700));
+	usleep(700);
 
 	id2iperf_time_before("test2");
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	usleep(500);
 
 	id2iperf_time_after(1);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	usleep(200);
 
 	id2iperf_time_after(2);
 
