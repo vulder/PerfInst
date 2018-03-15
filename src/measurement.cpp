@@ -99,7 +99,7 @@ void Measurement::report() {
 		std::cout <<
 			featureStats.first <<
 			" -> " <<
-			(featureStats.second.mStats.mDuration.count() / 1000000.0f) <<
+			((featureStats.second.mStats.mDuration - featureStats.second.mOverhead.mDuration).count() / 1000000.0f) <<
 			" ms, " <<
 			(featureStats.second.mOverhead.mDuration.count() / 1000000.0f) <<
 			" ms (measurements: " <<
@@ -112,7 +112,7 @@ void Measurement::report() {
 
 	std::cout <<
 		"Total time: " <<
-		std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mStats.mDuration).count() / 1000000.0f <<
+		std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mStats.mDuration - mStats["BASE"].mOverhead.mDuration).count() / 1000000.0f <<
 		" ms (overhead: " <<
 		std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mOverhead.mDuration).count() / 1000000.0f <<
 		")"
