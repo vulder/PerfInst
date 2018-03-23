@@ -151,7 +151,7 @@ void Measurement::report() {
 					{						
 						TimeStats overhead = overheadAccumulator - start.mOverhead;
 						stats.mOverhead += overhead;
-						stats.mStats += timestamps.second - start.mTimestamp - overhead;
+						stats.mStats += timestamps.second - start.mTimestamp;
 						auto it = context.find(start.mTimestamp.mContext);
 						stats.mMeasurements += it->second;
 						context.erase(it);
