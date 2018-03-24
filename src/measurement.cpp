@@ -80,6 +80,9 @@ void Measurement::time_after(int statementCount) {
 }
 
 void Measurement::report() {
+	using namespace std::chrono_literals;
+	perf_clock::duration total_overhead = 0ns;
+
 	*mTimestampBuffer = mFactory.getCurrentAfter(0);
 	mQueue.wait();
 	mQueue.push(*mTimestampSwap, mTimestampAfter);
@@ -99,22 +102,24 @@ void Measurement::report() {
 		std::cout <<
 			featureStats.first <<
 			" -> " <<
-			std::fixed << (featureStats.second.mStats.mDuration.count() / 1000000.0f) <<
+			(featureStats.second.mStats.mDuration.count() / 1000000.0f) <<
 			" ms, " <<
-			std::fixed << (featureStats.second.mOverhead.mDuration.count() / 1000000.0f) <<
+			(featureStats.second.mOverhead.mDuration.count() / 1000000.0f) <<
 			" ms (measurements: " <<
 			featureStats.second.mMeasurements <<
 			"; statements: " <<
 			featureStats.second.mStats.mStatementCount <<
 			")" <<
 			std::endl;
+
+		total_overhead += featureStats.second.mOverhead.mDuration;
 	}
 
 	std::cout <<
 		"Total time: " <<
-		std::fixed << std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mStats.mDuration).count() / 1000000.0f <<
+		std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mStats.mDuration).count() / 1000000.0f <<
 		" ms (overhead: " <<
-		std::fixed << std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mOverhead.mDuration).count() / 1000000.0f <<
+		std::chrono::duration_cast<std::chrono::nanoseconds>(total_overhead).count() / 1000000.0f <<
 		")"
 	<< std::endl;
 	std::cout << "-- Hercules Performance End --" << std::endl;
