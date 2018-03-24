@@ -151,10 +151,13 @@ void Measurement::report() {
 					{						
 						TimeStats overhead = overheadAccumulator - start.mOverhead;
 						stats.mOverhead += overhead;
-						stats.mStats += timestamps.second - start.mTimestamp;
+						stats.mStats += timestamps.second - start.mTimestamp - overhead;
 						auto it = context.find(start.mTimestamp.mContext);
 						stats.mMeasurements += it->second;
 						context.erase(it);
+
+						//Line necessary for HERCULES to work correctly. Comment out for more accurate results.
+						overheadAccumulator -= overhead;
 					}
 					
 					++mMeasurementsCount;

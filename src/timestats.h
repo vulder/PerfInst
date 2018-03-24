@@ -21,11 +21,16 @@ struct TimeStats {
 
 	TimeStats operator - (const TimeStats &other) const
 	{
-		TimeStats result;
-		result.mDuration = mDuration - other.mDuration;
-		result.mUserTime = mUserTime - other.mUserTime;
-		result.mKernelTime = mKernelTime - other.mKernelTime;
-		result.mStatementCount = mStatementCount - other.mStatementCount;
+		TimeStats result = *this;
+		result -= other;
 		return result;
+	}
+
+	void operator -= (const TimeStats &other)
+	{
+		mDuration -= other.mDuration;
+		mUserTime -= other.mUserTime;
+		mKernelTime -= other.mKernelTime;
+		mStatementCount -= other.mStatementCount;
 	}
 };
