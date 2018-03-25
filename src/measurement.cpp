@@ -117,7 +117,7 @@ void Measurement::report() {
 
 	std::cout <<
 		"Total time: " <<
-		std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mStats.mDuration).count() / 1000000.0f <<
+		std::chrono::duration_cast<std::chrono::nanoseconds>(mStats["BASE"].mStats.mDuration - total_overhead).count() / 1000000.0f <<
 		" ms (overhead: " <<
 		std::chrono::duration_cast<std::chrono::nanoseconds>(total_overhead).count() / 1000000.0f <<
 		")"
