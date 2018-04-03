@@ -141,10 +141,14 @@ void Measurement::report() {
 				if (timestamps.first.mBefore) {
 					const auto &pib = context.insert({timestamps.first.mContext,0});
 
-					if (pib.second && !mStack.empty()){
+					if (pib.second){
 						prefixIndices.push(prefix.size());
 						if (!prefix.empty()){
-							prefix += '#';
+							if (prefix == "BASE"){
+								prefix.clear();
+							}else{
+								prefix += '#';
+							}
 						}
 						prefix += timestamps.first.mContext;
 					}
@@ -178,10 +182,9 @@ void Measurement::report() {
 						//Line necessary for HERCULES to work correctly. Comment out for more accurate results.
 						overheadAccumulator -= overhead;
 						
-						if (!prefixIndices.empty()){
-							prefix = prefix.substr(0, prefixIndices.top());
-							prefixIndices.pop();
-						}
+						prefix = prefix.substr(0, prefixIndices.top());
+						prefixIndices.pop();
+
 					}
 					
 					++mMeasurementsCount;
