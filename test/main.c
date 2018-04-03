@@ -21,6 +21,10 @@ int main() {
 
 	usleep(500);
 
+	id2iperf_time_before("test");
+
+	id2iperf_time_after(3);
+
 	id2iperf_time_after(1);
 
 	usleep(200);
