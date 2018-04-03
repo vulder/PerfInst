@@ -184,6 +184,8 @@ void Measurement::report() {
 						
 						prefix = prefix.substr(0, prefixIndices.top());
 						prefixIndices.pop();
+						if (prefix.empty())
+							prefix = "BASE";
 
 					}
 					
