@@ -142,13 +142,12 @@ void Measurement::report() {
 					const auto &pib = context.insert({timestamps.first.mContext,0});
 
 					if (pib.second){
+						if (prefix == "BASE"){
+							prefix.clear();
+						}
 						prefixIndices.push(prefix.size());
 						if (!prefix.empty()){
-							if (prefix == "BASE"){
-								prefix.clear();
-							}else{
-								prefix += '#';
-							}
+							prefix += '#';
 						}
 						prefix += timestamps.first.mContext;
 					}
