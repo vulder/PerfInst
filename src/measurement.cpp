@@ -178,8 +178,10 @@ void Measurement::report() {
 						//Line necessary for HERCULES to work correctly. Comment out for more accurate results.
 						overheadAccumulator -= overhead;
 						
-						prefix = prefix.substr(0, prefixIndices.top());
-						prefixIndices.pop();
+						if (!prefixIndices.empty()){
+							prefix = prefix.substr(0, prefixIndices.top());
+							prefixIndices.pop();
+						}
 					}
 					
 					++mMeasurementsCount;
