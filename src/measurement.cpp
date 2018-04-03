@@ -98,7 +98,7 @@ void Measurement::report() {
 	std::cout << "Hashmap size: " << mStats.size() << std::endl;
 	std::cout << "Measurement counter: " << mMeasurementsCount << std::endl;
 
-	for (const std::pair<const char * const, ExtendedTimeStats> &featureStats : mStats) {
+	for (const std::pair<const std::string, ExtendedTimeStats> &featureStats : mStats) {
 		std::cout <<
 			featureStats.first <<
 			" -> " <<
@@ -131,6 +131,9 @@ void Measurement::report() {
 		std::pair<Timestamp, Timestamp> timestamps;
 		std::unordered_map<const char *, int> context;
 		
+		std::string prefix;
+		std::stack<int> prefixIndices;
+		
 		TimeStats overheadAccumulator;
 
 		while (mConsumerRunning || !mQueue.empty()) {
@@ -142,10 +145,19 @@ void Measurement::report() {
 					overheadAccumulator += timestamps.second - timestamps.first;
 					
 					++(pib.first->second);
+					if (pib.second){
+						prefixIndices.push(prefix.size());
+						if (!prefix.empty()){
+							prefix += '#';
+						}
+						prefix += timestamps.first.mContext;
+					}
 				}
 				else {
+					
+					
 					ExtendedTimestamp &start = mStack.top();
-					ExtendedTimeStats &stats = mStats[start.mTimestamp.mContext];
+					ExtendedTimeStats &stats = mStats[prefix];
 
 					overheadAccumulator += timestamps.second - timestamps.first;
 
@@ -163,6 +175,9 @@ void Measurement::report() {
 
 						//Line necessary for HERCULES to work correctly. Comment out for more accurate results.
 						overheadAccumulator -= overhead;
+						
+						prefix = prefix.substr(0, prefixIndices.top());
+						prefixIndices.pop();
 					}
 					
 					++mMeasurementsCount;
