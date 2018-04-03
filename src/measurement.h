@@ -33,7 +33,7 @@ private:
 	Queue<Timestamp> mQueue;
 	TimestampFactory mFactory;
 
-	std::map<const char *, ExtendedTimeStats> mStats;
+	std::map<const std::string, ExtendedTimeStats> mStats;
 
 	std::stack<ExtendedTimestamp> mStack;
 
