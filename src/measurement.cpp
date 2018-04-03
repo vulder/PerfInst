@@ -141,17 +141,19 @@ void Measurement::report() {
 				if (timestamps.first.mBefore) {
 					const auto &pib = context.insert({timestamps.first.mContext,0});
 
-					mStack.emplace(std::move(timestamps.first), overheadAccumulator, pib.second);
-					overheadAccumulator += timestamps.second - timestamps.first;
-					
-					++(pib.first->second);
-					if (pib.second){
+					if (pib.second && !mStack.empty()){
 						prefixIndices.push(prefix.size());
 						if (!prefix.empty()){
 							prefix += '#';
 						}
 						prefix += timestamps.first.mContext;
 					}
+					
+					mStack.emplace(std::move(timestamps.first), overheadAccumulator, pib.second);
+					overheadAccumulator += timestamps.second - timestamps.first;
+					
+					++(pib.first->second);
+					
 				}
 				else {
 					
